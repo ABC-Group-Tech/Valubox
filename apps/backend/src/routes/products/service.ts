@@ -17,3 +17,11 @@ export async function getProductById(id: string) {
 export async function createProduct(data: CreateProductInput) {
   return prisma.product.create({ data });
 }
+
+export async function deleteProduct(id: string) {
+  const orderItemCount = await prisma.orderItem.count({ where: { productId: id } });
+  if (orderItemCount > 0) throw new Error("PRODUCT_HAS_ORDERS");
+
+  await prisma.cartItem.deleteMany({ where: { productId: id } });
+  return prisma.product.delete({ where: { id } });
+}
