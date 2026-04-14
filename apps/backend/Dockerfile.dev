@@ -1,0 +1,16 @@
+FROM node:20-alpine
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# 모노레포 루트 의존성 파일 복사
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+
+# backend 의존성만 설치 (node_modules는 이미지에 보존)
+RUN pnpm install --filter backend
+
+WORKDIR /app/apps/backend
+
+# 컨테이너 시작 시: Prisma 클라이언트 생성 → 마이그레이션 → 개발 서버
+CMD ["sh", "-c", "pnpm db:generate && pnpm db:deploy && pnpm dev"]
