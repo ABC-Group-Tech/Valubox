@@ -13,3 +13,7 @@ export async function getProducts({ page, limit }: ProductListQuery) {
 export async function getProductById(id: string) {
   return prisma.product.findUnique({ where: { id } });
 }
+
+export async function createProduct(data: CreateProductInput) {
+  return prisma.product.create({ data });
+}
