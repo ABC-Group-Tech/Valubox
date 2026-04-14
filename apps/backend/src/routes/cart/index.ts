@@ -15,8 +15,15 @@ export default async function cartRoutes(app: FastifyInstance) {
     const sessionId = request.headers[SESSION_HEADER] as string;
     if (!sessionId) return reply.badRequest("x-session-id header is required");
     const body = addCartItemSchema.parse(request.body);
-    const item = await addCartItem(sessionId, body);
-    return reply.status(201).send(item);
+    try {
+      const item = await addCartItem(sessionId, body);
+      return reply.status(201).send(item);
+    } catch (err) {
+      if (err instanceof Error && err.message === "OUT_OF_STOCK") {
+        return reply.conflict("품절된 상품입니다.");
+      }
+      throw err;
+    }
   });
 
   app.patch("/items/:id", async (request, reply) => {
