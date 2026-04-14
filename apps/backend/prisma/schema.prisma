@@ -3,6 +3,10 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+datasource db {
+  provider = "postgresql"
+}
+
 model Product {
   id          String      @id @default(uuid())
   name        String
