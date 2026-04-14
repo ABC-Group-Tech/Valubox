@@ -34,6 +34,8 @@ services:
       - ./apps/backend:/app/apps/backend
       # node_modules는 이미지에서 설치한 버전 유지 (named volume이 bind mount보다 우선)
       - backend_modules:/app/apps/backend/node_modules
+      # 빌드 단계에서 생성된 Prisma 클라이언트 보호 (bind mount에 덮이지 않도록)
+      - backend_generated:/app/apps/backend/src/generated
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,4 +60,5 @@ services:
 volumes:
   postgres_dev_data:
   backend_modules:
+  backend_generated:
   frontend_modules:
