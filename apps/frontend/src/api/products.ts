@@ -21,3 +21,7 @@ export async function createProduct(payload: {
   const { data } = await apiClient.post("/api/products", payload);
   return data;
 }
+
+export async function deleteProduct(id: string): Promise<void> {
+  await apiClient.delete(`/api/products/${id}`);
+}
