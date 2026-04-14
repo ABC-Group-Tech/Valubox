@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: valubox-postgres-dev
+    environment:
+      POSTGRES_USER: valubox
+      POSTGRES_PASSWORD: valubox
+      POSTGRES_DB: valubox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valubox"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile.dev
+    container_name: valubox-backend-dev
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      # .env의 DATABASE_URL을 Docker 네트워크 주소로 override
+      DATABASE_URL: postgresql://valubox:valubox@postgres:5432/valubox
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      # 소스 코드 bind mount (변경 즉시 반영)
+      - ./apps/backend:/app/apps/backend
+      # node_modules는 이미지에서 설치한 버전 유지 (named volume이 bind mount보다 우선)
+      - backend_modules:/app/apps/backend/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile.dev
+    container_name: valubox-frontend-dev
+    env_file:
+      - ./apps/frontend/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      # 소스 코드 bind mount (HMR 작동)
+      - ./apps/frontend:/app/apps/frontend
+      # node_modules는 이미지에서 설치한 버전 유지
+      - frontend_modules:/app/apps/frontend/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_dev_data:
+  backend_modules:
+  frontend_modules:
