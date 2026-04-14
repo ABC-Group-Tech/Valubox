@@ -6,17 +6,14 @@ WORKDIR /app
 # 모노레포 루트 의존성 파일 복사
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/backend/package.json ./apps/backend/
+COPY apps/backend/prisma ./apps/backend/prisma/
+COPY apps/backend/prisma.config.ts ./apps/backend/
 
 # backend 의존성 설치
 RUN pnpm install --filter backend
 
-# Prisma generate는 DB 연결 불필요 — 빌드 단계에서 실행
-COPY apps/backend/prisma ./apps/backend/prisma/
-COPY apps/backend/prisma.config.ts ./apps/backend/
-
 WORKDIR /app/apps/backend
-RUN pnpm db:generate
 
-# CMD: 마이그레이션 적용 → 개발 서버 실행
-# (generate는 빌드 단계에서 완료, src/generated는 named volume으로 보호)
-CMD ["sh", "-c", "pnpm db:deploy && pnpm dev"]
+# CMD: Prisma 생성 → 마이그레이션 → 개발 서버
+# src/만 bind mount이므로 generated/ 경로는 겹치지 않아 안전
+CMD ["sh", "-c", "pnpm db:generate && pnpm db:deploy && pnpm dev"]

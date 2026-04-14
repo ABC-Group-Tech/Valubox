@@ -33,7 +33,6 @@ services:
       # src/만 bind mount — generated/와 node_modules는 이미지 버전 유지
       - ./apps/backend/src:/app/apps/backend/src
       - backend_modules:/app/apps/backend/node_modules
-      - backend_generated:/app/apps/backend/generated
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,5 +57,4 @@ services:
 volumes:
   postgres_dev_data:
   backend_modules:
-  backend_generated:
   frontend_modules:
