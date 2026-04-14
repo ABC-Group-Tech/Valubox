@@ -10,3 +10,12 @@ export async function addToCart(productId: string, quantity = 1): Promise<CartIt
   const { data } = await apiClient.post("/api/cart/items", { productId, quantity });
   return data;
 }
+
+export async function updateCartItem(itemId: string, quantity: number): Promise<CartItem> {
+  const { data } = await apiClient.patch(`/api/cart/items/${itemId}`, { quantity });
+  return data;
+}
+
+export async function removeCartItem(itemId: string): Promise<void> {
+  await apiClient.delete(`/api/cart/items/${itemId}`);
+}
