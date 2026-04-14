@@ -30,12 +30,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # 소스 코드 bind mount (변경 즉시 반영)
-      - ./apps/backend:/app/apps/backend
-      # node_modules는 이미지에서 설치한 버전 유지 (named volume이 bind mount보다 우선)
+      # src/만 bind mount — generated/와 node_modules는 이미지 버전 유지
+      - ./apps/backend/src:/app/apps/backend/src
       - backend_modules:/app/apps/backend/node_modules
-      # 빌드 단계에서 생성된 Prisma 클라이언트 보호 (bind mount에 덮이지 않도록)
-      - backend_generated:/app/apps/backend/src/generated
+      - backend_generated:/app/apps/backend/generated
     depends_on:
       postgres:
         condition: service_healthy
