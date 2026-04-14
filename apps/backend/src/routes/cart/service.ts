@@ -33,3 +33,15 @@ export async function addCartItem(sessionId: string, { productId, quantity }: Ad
     include: { product: true },
   });
 }
+
+export async function updateCartItem(itemId: string, { quantity }: UpdateCartItemInput) {
+  return prisma.cartItem.update({
+    where: { id: itemId },
+    data: { quantity },
+    include: { product: true },
+  });
+}
+
+export async function removeCartItem(itemId: string) {
+  return prisma.cartItem.delete({ where: { id: itemId } });
+}
