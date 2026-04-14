@@ -9,3 +9,7 @@ export async function getProducts({ page, limit }: ProductListQuery) {
   ]);
   return { data, total, page, limit };
 }
+
+export async function getProductById(id: string) {
+  return prisma.product.findUnique({ where: { id } });
+}
