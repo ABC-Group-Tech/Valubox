@@ -17,6 +17,10 @@ export async function getOrCreateCart(sessionId: string) {
 }
 
 export async function addCartItem(sessionId: string, { productId, quantity }: AddCartItemInput) {
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product) throw new Error("PRODUCT_NOT_FOUND");
+  if (product.stock === 0) throw new Error("OUT_OF_STOCK");
+
   const cart = await getOrCreateCart(sessionId);
   const existing = cart.items.find((item) => item.productId === productId);
 
