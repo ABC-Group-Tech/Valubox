@@ -1,0 +1,16 @@
+FROM node:20-alpine
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# 모노레포 루트 의존성 파일 복사
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/frontend/package.json ./apps/frontend/
+
+# frontend 의존성만 설치 (node_modules는 이미지에 보존)
+RUN pnpm install --filter frontend
+
+WORKDIR /app/apps/frontend
+
+# --host: Docker 외부에서 접근 가능하도록 0.0.0.0 바인딩
+CMD ["pnpm", "dev", "--host"]
