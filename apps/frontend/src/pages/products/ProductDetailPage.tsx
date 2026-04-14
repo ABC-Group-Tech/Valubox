@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchProductById } from "@/api/products";
+import { fetchProductById, deleteProduct } from "@/api/products";
 import { addToCart } from "@/api/cart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,23 @@ export default function ProductDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success("장바구니에 담겼습니다.");
     },
-    onError: () => toast.error("장바구니 추가에 실패했습니다."),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast.error(msg ?? "장바구니 추가에 실패했습니다.");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteProduct(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("상품이 삭제되었습니다.");
+      navigate("/");
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast.error(msg ?? "상품 삭제에 실패했습니다.");
+    },
   });
 
   if (isLoading) return <div className="flex justify-center py-20">불러오는 중...</div>;
@@ -35,9 +51,21 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/" className="text-sm text-muted-foreground hover:underline mb-6 inline-block">
-        ← 목록으로
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link to="/" className="text-sm text-muted-foreground hover:underline">
+          ← 목록으로
+        </Link>
+        <Button
+          variant="destructive"
+          size="sm"
+          disabled={deleteMutation.isPending}
+          onClick={() => {
+            if (confirm("상품을 삭제하시겠습니까?")) deleteMutation.mutate();
+          }}
+        >
+          상품 삭제
+        </Button>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-8">
         <div>
